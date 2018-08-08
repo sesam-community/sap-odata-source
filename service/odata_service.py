@@ -56,7 +56,7 @@ def process_request(url, since_enabled, since_property):
     yield ']'
 
 
-@APP.route("/<string:url>", methods=["GET"])
+@APP.route("/datasets/<string:url>/entities", methods=["GET"])
 def fetch_data(url):
     """service entry point"""
     if not is_endpoint_allowed(url):
@@ -80,6 +80,11 @@ def fetch_data(url):
 
     return Response(process_request(SERVICE_URL + url + query, since_enabled, since_property)
                     , mimetype='application/json')
+
+
+@APP.route("/datasets", methods=["GET"])
+def fetch_datasets():
+    return Response(json.dumps(EXPOSED_URLS), mimetype='application/json')
 
 
 def is_endpoint_allowed(url):
