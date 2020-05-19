@@ -7,7 +7,7 @@ from sesamutils import VariablesConfig
 from sesamutils import sesam_logger
 import sys
 import json
-import re
+import time
 
 # set env.vars
 required_env_vars = ["SERVICE_URL", "USERNAME", "PASSWORD"]
@@ -24,7 +24,7 @@ if not config.validate():
 
 # authentication
 auth = None
-if config.AUTH_TYPE == "basic":
+if config.AUTH_TYPE.lower() == "basic":
     auth = (config.USERNAME, config.PASSWORD)
 else:
     logger.error(f"Unsupported authentication type: {config.AUTH_TYPE}")
@@ -66,32 +66,53 @@ def process_request(url, since_enabled, since_property):
 
     while url:
         logger.debug(f"Request url: {url}")
-        url_obj = requests.get(url, auth=auth)
-        data = json.loads(url_obj.text.encode("utf8"))
+        response = requests.get(url, auth=auth)
+        data = json.loads(response.text.encode("utf8"))
+        # data = response.json() ?
 
         # FIXME: handle single entities
         entities = data["d"].get("results") or data.get("d")
         if not entities:
             break
 
-        for value in entities:
+        for entity in entities:
             if not first:
                 yield ','
             else:
                 first = False
 
-            # if '@odata.id' in value:
-            #     id_val = re.search(r'\((.*?)\)', value['@odata.id']).group(1).replace("'", "")
-            #     value['_id'] = id_val
+            for key in entity:
+
+                logger.debug(f"key: {key}")
+                logger.debug(f"value: {entity[key]}")
+
+                value = entity[key]
+
+                if value and "/Date(" in value:
+                    local_iso_date = sap_epoch_to_iso_date(value)
+                    logger.debug(f"{key}: {local_iso_date}")
+                    entity[key] = local_iso_date
 
             if since_enabled:
-                value['_updated'] = value[since_property]
+                entity['_updated'] = entity[since_property]
 
-            yield json.dumps(value)
+            yield json.dumps(entity)
 
         url = data["d"].get("__next")
 
     yield ']'
+
+
+def sap_epoch_to_iso_date(sap_epoch):
+    """ Convert SAP date string in UTC milliseconds to local ISO date """
+
+    epoch_string = str(sap_epoch).replace("/Date(", "").replace(")/", "")  # isolate epoch time
+    epoch_ms = epoch_string.replace("+0000", "")  # epoch in ms (UTC)
+    epoch_timestamp = int(epoch_ms) / 1000  # epoch in seconds (UTC)
+    local_dt = time.localtime(epoch_timestamp)  # local timezone
+    local_dt_formatted = time.strftime('%Y-%m-%dT%H:%M:%S%z', local_dt)  # ISO formatted
+
+    return local_dt_formatted
 
 
 if __name__ == "__main__":
