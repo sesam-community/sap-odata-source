@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask, Response, request
+from flask import Flask, Response, request, abort
 import requests
 from sesamutils.flask import serve
 from sesamutils import VariablesConfig
@@ -11,23 +11,23 @@ import time
 
 # set env.vars
 required_env_vars = ["SERVICE_URL", "USERNAME", "PASSWORD"]
-optional_env_vars = ["LOG_LEVEL", ("AUTH_TYPE", "basic")]
+optional_env_vars = ["LOG_LEVEL", ("AUTH_TYPE", "basic"), "SINCE_PROPERTY"]
 
-config = VariablesConfig(required_env_vars, optional_env_vars=optional_env_vars)
+env_vars = VariablesConfig(required_env_vars, optional_env_vars=optional_env_vars)
 
 # set logging
 logger = sesam_logger("sap-odata-source")
 
 # check that all required env.vars are supplied
-if not config.validate():
+if not env_vars.validate():
     sys.exit(1)
 
 # authentication
 auth = None
-if config.AUTH_TYPE.lower() == "basic":
-    auth = (config.USERNAME, config.PASSWORD)
+if env_vars.AUTH_TYPE.lower() == "basic":
+    auth = (env_vars.USERNAME, env_vars.PASSWORD)
 else:
-    logger.error(f"Unsupported authentication type: {config.AUTH_TYPE}")
+    logger.error(f"Unsupported authentication type: {env_vars.AUTH_TYPE}")
     sys.exit(1)
 
 # start the service
@@ -41,39 +41,47 @@ def get_entity_set(entity_set):
     format = request.args.get("$format") if request.args.get("$format") is not None else "json"
     expand = request.args.get("$expand")
 
-    full_url = config.SERVICE_URL + entity_set + f"?$format={format}"
+    full_url = f"{env_vars.SERVICE_URL}{entity_set}?$format={format}"
 
     if expand:
         full_url += f"&$expand={expand}"
 
-    since_enabled = request.args.get('since') is not None
-    since_property = None
+    since_enabled = request.args.get("since") is not None
+    since_property = env_vars.SINCE_PROPERTY
 
-    if since_enabled:
-        since_property = request.args.get('since')
-        query = "&$filter=" + since_property + "%20gt%20DateTime'" + request.args.get("since")
-        full_url += query
+    if since_enabled and since_property:
+        since = request.args.get("since")
+        full_url += f"&$filter={since_property} gt '{since}'"
 
     return Response(process_request(url=full_url, since_enabled=since_enabled, since_property=since_property),
-                    mimetype='application/json')
+                    mimetype="application/json")
 
 
 def process_request(url, since_enabled, since_property):
     """fetch entities from given Odata url and dumps back to client as JSON stream"""
 
-    first = True
     yield '['
+    first = True
+    count = 0
 
     while url:
-        logger.debug(f"Request url: {url}")
+        logger.info(f"Request url: {url}")
         response = requests.get(url, auth=auth)
-        data = json.loads(response.text.encode("utf8"))
-        # data = response.json() ?
 
-        # FIXME: handle single entities
+        if not response.ok:
+            abort(response.status_code)
+
+        data = response.json()
+
         entities = data["d"].get("results") or data.get("d")
         if not entities:
             break
+
+        # Make single entity a list
+        if type(entities) is not type([]):
+            tmp = list()
+            tmp.append(entities)
+            entities = tmp
 
         for entity in entities:
             if not first:
@@ -81,25 +89,30 @@ def process_request(url, since_enabled, since_property):
             else:
                 first = False
 
+            # Convert dates one level deep
             for key in entity:
 
-                logger.debug(f"key: {key}")
-                logger.debug(f"value: {entity[key]}")
-
+                # logger.debug(f"key: '{key}' value: '{entity[key]}'")
                 value = entity[key]
+
+                # Dates are represented as strings in SAP so we can skip all non-string values
+                if type(value) is not type(""):
+                    continue
 
                 if value and "/Date(" in value:
                     local_iso_date = sap_epoch_to_iso_date(value)
-                    logger.debug(f"{key}: {local_iso_date}")
+                    # logger.debug(f"{key}: {value} --> {local_iso_date}")
                     entity[key] = local_iso_date
 
             if since_enabled:
-                entity['_updated'] = entity[since_property]
+                entity["_updated"] = entity[since_property]
 
+            count += 1
             yield json.dumps(entity)
 
         url = data["d"].get("__next")
 
+    logger.info(f"Fetched {count} entities")
     yield ']'
 
 
