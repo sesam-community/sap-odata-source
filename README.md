@@ -34,10 +34,10 @@ TODO:
     "environment": {
       "AUTH_TYPE": "basic",
       "LOG_LEVEL": "INFO",
-      "PASSWORD": "$SECRET(successfactors-password)",
+      "PASSWORD": "$SECRET(sap-password)",
       "SERVICE_URL": "https://<service_url>/odata/v2/",
       "SINCE_PROPERTY": "lastModifiedDateTime",
-      "USERNAME": "$SECRET(successfactors-username)"
+      "USERNAME": "$SECRET(sap-username)"
     },
     "image": "gamh/sap-odata-source:1.0",
     "port": 5000
