@@ -14,7 +14,7 @@ TODO:
 
 `SERVICE_URL` - base url to the Odata Service API
 
-`AUTH` - Authentication method (Default: "Basic")
+`AUTH_TYPE` - Authentication method (Default: "Basic")
 
 `USERNAME` - Username to authenticate with the Odata Service
 
