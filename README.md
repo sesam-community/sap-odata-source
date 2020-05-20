@@ -1,5 +1,5 @@
 # sap-odata-source
-SAP OData connector for Sesam.io powered apps
+SAP OData microservice connector for Sesam.io powered apps
 
 Supports:
 - Basic Authentication
@@ -71,173 +71,173 @@ TODO:
 }
 ```
 
-## Example response from sap to the MS
+## Example response from SAP to the Microservice
 ```
 {
-    "d": {
-        "results": [
-            {
-                "__metadata": {
-                    "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')",
-                    "type": "SFOData.PerPerson"
-                },
-                "personIdExternal": "test01",
-                "placeOfBirth": null,
-                "lastModifiedDateTime": "/Date(1587072082000+0000)/",
-                "lastModifiedBy": "adminPM",
-                "createdDateTime": "/Date(1587072082000+0000)/",
-                "dateOfBirth": "/Date(166838400000)/",
-                "perPersonUuid": "F674BA4105E24E299485FD660935F2DF",
-                "createdOn": "/Date(1587079282000)/",
-                "lastModifiedOn": "/Date(1587079282000)/",
-                "countryOfBirth": null,
-                "createdBy": "adminPM",
-                "personId": "467",
-                "personalInfoNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/personalInfoNav"
-                    }
-                },
-                "emergencyContactNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/emergencyContactNav"
-                    }
-                },
-                "personEmpTerminationInfoNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/personEmpTerminationInfoNav"
-                    }
-                },
-                "phoneNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/phoneNav"
-                    }
-                },
-                "employmentNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/employmentNav"
-                    }
-                },
-                "countryOfBirthNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/countryOfBirthNav"
-                    }
-                },
-                "personRerlationshipNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/personRerlationshipNav"
-                    }
-                },
-                "nationalIdNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/nationalIdNav"
-                    }
-                },
-                "userAccountNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/userAccountNav"
-                    }
-                },
-                "personTypeUsageNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/personTypeUsageNav"
-                    }
-                },
-                "emailNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/emailNav"
-                    }
-                },
-                "homeAddressNavDEFLT": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/homeAddressNavDEFLT"
-                    }
-                }
-            },
-            {
-                "__metadata": {
-                    "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')",
-                    "type": "SFOData.PerPerson"
-                },
-                "personIdExternal": "test01_d0",
-                "placeOfBirth": null,
-                "lastModifiedDateTime": "/Date(1587072081000+0000)/",
-                "lastModifiedBy": "adminPM",
-                "createdDateTime": "/Date(1587072081000+0000)/",
-                "dateOfBirth": "/Date(293760000000)/",
-                "perPersonUuid": "61C27B6410744754A1BE0FC843454AC3",
-                "createdOn": "/Date(1587079281000)/",
-                "lastModifiedOn": "/Date(1587079281000)/",
-                "countryOfBirth": null,
-                "createdBy": "adminPM",
-                "personId": "468",
-                "personalInfoNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/personalInfoNav"
-                    }
-                },
-                "emergencyContactNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/emergencyContactNav"
-                    }
-                },
-                "personEmpTerminationInfoNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/personEmpTerminationInfoNav"
-                    }
-                },
-                "phoneNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/phoneNav"
-                    }
-                },
-                "employmentNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/employmentNav"
-                    }
-                },
-                "countryOfBirthNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/countryOfBirthNav"
-                    }
-                },
-                "personRerlationshipNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/personRerlationshipNav"
-                    }
-                },
-                "nationalIdNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/nationalIdNav"
-                    }
-                },
-                "userAccountNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/userAccountNav"
-                    }
-                },
-                "personTypeUsageNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/personTypeUsageNav"
-                    }
-                },
-                "emailNav": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/emailNav"
-                    }
-                },
-                "homeAddressNavDEFLT": {
-                    "__deferred": {
-                        "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/homeAddressNavDEFLT"
-                    }
-                }
-            }
-        ]
-    }
+  "d": {
+    "results": [
+      {
+        "__metadata": {
+          "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')",
+          "type": "SFOData.PerPerson"
+        },
+        "personIdExternal": "test01",
+        "placeOfBirth": null,
+        "lastModifiedDateTime": "/Date(1587072082000+0000)/",
+        "lastModifiedBy": "adminPM",
+        "createdDateTime": "/Date(1587072082000+0000)/",
+        "dateOfBirth": "/Date(166838400000)/",
+        "perPersonUuid": "F674BA4105E24E299485FD660935F2DF",
+        "createdOn": "/Date(1587079282000)/",
+        "lastModifiedOn": "/Date(1587079282000)/",
+        "countryOfBirth": null,
+        "createdBy": "adminPM",
+        "personId": "467",
+        "personalInfoNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/personalInfoNav"
+          }
+        },
+        "emergencyContactNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/emergencyContactNav"
+          }
+        },
+        "personEmpTerminationInfoNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/personEmpTerminationInfoNav"
+          }
+        },
+        "phoneNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/phoneNav"
+          }
+        },
+        "employmentNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/employmentNav"
+          }
+        },
+        "countryOfBirthNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/countryOfBirthNav"
+          }
+        },
+        "personRerlationshipNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/personRerlationshipNav"
+          }
+        },
+        "nationalIdNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/nationalIdNav"
+          }
+        },
+        "userAccountNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/userAccountNav"
+          }
+        },
+        "personTypeUsageNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/personTypeUsageNav"
+          }
+        },
+        "emailNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/emailNav"
+          }
+        },
+        "homeAddressNavDEFLT": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01')/homeAddressNavDEFLT"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')",
+          "type": "SFOData.PerPerson"
+        },
+        "personIdExternal": "test01_d0",
+        "placeOfBirth": null,
+        "lastModifiedDateTime": "/Date(1587072081000+0000)/",
+        "lastModifiedBy": "adminPM",
+        "createdDateTime": "/Date(1587072081000+0000)/",
+        "dateOfBirth": "/Date(293760000000)/",
+        "perPersonUuid": "61C27B6410744754A1BE0FC843454AC3",
+        "createdOn": "/Date(1587079281000)/",
+        "lastModifiedOn": "/Date(1587079281000)/",
+        "countryOfBirth": null,
+        "createdBy": "adminPM",
+        "personId": "468",
+        "personalInfoNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/personalInfoNav"
+          }
+        },
+        "emergencyContactNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/emergencyContactNav"
+          }
+        },
+        "personEmpTerminationInfoNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/personEmpTerminationInfoNav"
+          }
+        },
+        "phoneNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/phoneNav"
+          }
+        },
+        "employmentNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/employmentNav"
+          }
+        },
+        "countryOfBirthNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/countryOfBirthNav"
+          }
+        },
+        "personRerlationshipNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/personRerlationshipNav"
+          }
+        },
+        "nationalIdNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/nationalIdNav"
+          }
+        },
+        "userAccountNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/userAccountNav"
+          }
+        },
+        "personTypeUsageNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/personTypeUsageNav"
+          }
+        },
+        "emailNav": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/emailNav"
+          }
+        },
+        "homeAddressNavDEFLT": {
+          "__deferred": {
+            "uri": "https://api2preview.sapsf.eu/odata/v2/PerPerson('test01_d0')/homeAddressNavDEFLT"
+          }
+        }
+      }
+    ]
+  }
 }
 ```
 
-## Example JSON stream from MS to Sesam
+## Example JSON stream from the Microservice to Sesam
 ```
 [
     {
