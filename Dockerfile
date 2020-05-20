@@ -1,5 +1,5 @@
 FROM python:3-alpine
-MAINTAINER Timur Samkharadze "timur.samkharadze@sysco.no"
+MAINTAINER Geir Atle Hegsvold "geir.hegsvold@sesam.io"
 ARG BuildNumber=unknown
 LABEL BuildNumber $BuildNumber
 ARG Commit=unknown
@@ -9,4 +9,4 @@ WORKDIR /service
 RUN pip install -r requirements.txt
 EXPOSE 5000/tcp
 ENTRYPOINT ["python"]
-CMD ["odata_service.py"]
+CMD ["service.py"]
