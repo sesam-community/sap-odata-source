@@ -42,7 +42,6 @@ Supply `since_property=<last modified date property>` in pipe.source.url to over
       "LOG_LEVEL": "INFO",
       "PASSWORD": "$SECRET(sap-password)",
       "SERVICE_URL": "https://<service_url>/odata/v2/",
-      "SINCE_PROPERTY": "lastModifiedDateTime",
       "USERNAME": "$SECRET(sap-username)"
     },
     "image": "gamh/sap-odata-source:1.0",
