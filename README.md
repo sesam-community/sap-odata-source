@@ -1,14 +1,13 @@
 # sap-odata-source
-SAP OData microservice connector for Sesam.io powered apps
+
+SAP OData microservice connector for Sesam.io powered apps.
 
 Supports:
 - Basic Authentication
 - JSON streaming of response messages
 - Snapshot paging
 - Odata $expand
-
-TODO:
-- Since (delta import)
+- Delta import
 
 ## Environment variables
 
@@ -20,10 +19,17 @@ TODO:
 
 `PASSWORD` - Password to authenticate with the Odata Service
 
-`SINCE_PROPERTY` - Property for which to evaluate delta import
-
 `LOG_LEVEL` - Default 'INFO'. Ref: https://docs.python.org/3/howto/logging.html#logging-levels
 
+## URL parameters
+
+Default since property for which to evaluate delta import is `lastModifiedDateTime`.
+
+Supply `since_property=<last modified date property>` in pipe.source.url to override the default:
+
+```
+"url": "PerPerson?since_property=<last modified date property>"
+```
 
 ## Example system config
 ```
@@ -54,6 +60,8 @@ TODO:
   "source": {
     "type": "json",
     "system": "sap-odata-source",
+    "is_since_comparable": true,
+    "supports_since": true,
     "url": "PerPerson"
   },
   "transform": {
