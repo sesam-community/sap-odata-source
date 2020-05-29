@@ -9,14 +9,14 @@ import requests
 import sys
 import time
 
-# Set env.vars
+# Activate logging
+logger = sesam_logger("sap-odata-source")
+
+# Get env.vars
 required_env_vars = ["SERVICE_URL", "USERNAME", "PASSWORD"]
 optional_env_vars = ["LOG_LEVEL", ("AUTH_TYPE", "basic")]
 
 env_vars = VariablesConfig(required_env_vars, optional_env_vars=optional_env_vars)
-
-# Set logging
-logger = sesam_logger("sap-odata-source")
 
 # Check that all required env.vars are supplied
 if not env_vars.validate():
@@ -135,8 +135,8 @@ def sap_epoch_to_iso_date(sap_epoch):
     epoch_string = str(sap_epoch).replace("/Date(", "").replace(")/", "")  # isolate epoch time
     epoch_ms = epoch_string.replace("+0000", "")  # epoch in ms (UTC)
     epoch_timestamp = int(epoch_ms) / 1000  # epoch in seconds (UTC)
-    dt = time.localtime(epoch_timestamp)  # local time
     # dt = time.gmtime(epoch_timestamp)  # GMT time
+    dt = time.localtime(epoch_timestamp)  # local time
     dt_formatted = time.strftime('%Y-%m-%dT%H:%M:%S', dt)  # ISO formatted
 
     return dt_formatted
