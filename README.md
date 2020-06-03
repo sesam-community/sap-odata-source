@@ -9,6 +9,10 @@ Supports:
 - Dynamic URL query handling
 - Delta import
 
+## Docker image
+
+https://hub.docker.com/repository/docker/gamh/sap-odata-source/
+
 ## Environment variables
 
 `SERVICE_URL` - base url to the Odata Service API
