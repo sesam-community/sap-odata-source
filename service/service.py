@@ -66,7 +66,7 @@ def get_url_query(req):
 
 
 def process_request(url, since_enabled, since_property):
-    """ Fetch entities from the given Odata url and dump them back to client as JSON a stream """
+    """ Fetch entities from the given Odata url and dump them back to client as a JSON stream """
 
     logger.debug(f"since_enabled: {since_enabled}")
     logger.debug(f"since_property: {since_property}")
