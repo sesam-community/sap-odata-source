@@ -34,37 +34,46 @@ else:
 app = Flask(__name__)
 
 
-@app.route("/<entity_set>", methods=["GET"])
+@app.route("/<path:entity_set>", methods=["GET"])
 def get_entity_set(entity_set):
-    """service entry point"""
+    """ Service entry point """
 
-    format = request.args.get("$format") or "json"
-    expand = request.args.get("$expand")
+    query = get_url_query(request)
     since_property = request.args.get("since_property") or "lastModifiedDateTime"
     since_enabled = request.args.get("since") is not None
 
-    full_url = f"{env_vars.SERVICE_URL}{entity_set}?$format={format}"
-
-    if expand:
-        full_url += f"&$expand={expand}"
+    url = f"{env_vars.SERVICE_URL}{entity_set}?$format=json&{query}"
 
     if since_enabled and since_property:
         since = request.args.get("since")
-        full_url += f"&$filter={since_property} gt '{since}'"
+        url += f"&$filter={since_property} gt '{since}'"
 
-    return Response(process_request(url=full_url, since_enabled=since_enabled, since_property=since_property),
+    return Response(process_request(url=url, since_enabled=since_enabled, since_property=since_property),
                     mimetype="application/json")
 
 
+def get_url_query(req):
+    """ Get the 'query' part of the request """
+    args = dict(req.args)
+    query = ""
+    for key in args.keys():
+        if len(query):
+            query += "&"
+
+        query += f"{key}={args[key]}"
+
+    return query
+
+
 def process_request(url, since_enabled, since_property):
-    """fetch entities from given Odata url and dumps back to client as JSON stream"""
+    """ Fetch entities from the given Odata url and dump them back to client as JSON a stream """
 
     logger.debug(f"since_enabled: {since_enabled}")
     logger.debug(f"since_property: {since_property}")
 
     yield '['
     first = True
-    count = 0  # number of entities
+    count = 0  # number of entities fetched
 
     while url:
         logger.info(f"Request url: {url}")

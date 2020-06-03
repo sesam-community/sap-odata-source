@@ -6,7 +6,7 @@ Supports:
 - Basic Authentication
 - JSON streaming of response messages
 - Snapshot paging
-- Odata $expand
+- Dynamic URL query handling
 - Delta import
 
 ## Environment variables
@@ -23,7 +23,7 @@ Supports:
 
 ## URL parameters
 
-Default since property for which to evaluate delta import is `lastModifiedDateTime`.
+Default `since` property for which to evaluate delta import is `lastModifiedDateTime`.
 
 Supply `since_property=<last modified date property>` in pipe.source.url to override the default:
 
@@ -44,7 +44,7 @@ Supply `since_property=<last modified date property>` in pipe.source.url to over
       "SERVICE_URL": "https://<service_url>/odata/v2/",
       "USERNAME": "$SECRET(sap-username)"
     },
-    "image": "gamh/sap-odata-source:1.0",
+    "image": "gamh/sap-odata-source:<version>",
     "port": 5000
   },
   "verify_ssl": true
