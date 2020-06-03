@@ -36,7 +36,7 @@ app = Flask(__name__)
 
 @app.route("/<path:entity_set>", methods=["GET"])
 def get_entity_set(entity_set):
-    """ Service entry point """
+    """Service entry point."""
 
     query = get_url_query(request)
     since_property = request.args.get("since_property") or "lastModifiedDateTime"
@@ -53,7 +53,7 @@ def get_entity_set(entity_set):
 
 
 def get_url_query(req):
-    """ Get the 'query' part of the request """
+    """Get the 'query' part of the request."""
     args = dict(req.args)
     query = ""
     for key in args.keys():
@@ -66,7 +66,7 @@ def get_url_query(req):
 
 
 def process_request(url, since_enabled, since_property):
-    """ Fetch entities from the given Odata url and dump them back to client as a JSON stream """
+    """Fetch entities from the given Odata url and dump them back to client as a JSON stream."""
 
     logger.debug(f"since_enabled: {since_enabled}")
     logger.debug(f"since_property: {since_property}")
@@ -139,7 +139,7 @@ def process_request(url, since_enabled, since_property):
 
 
 def sap_epoch_to_iso_date(sap_epoch):
-    """ Convert SAP date string in UTC milliseconds to local ISO date """
+    """Convert SAP date string in UTC milliseconds to local ISO date."""
 
     epoch_string = str(sap_epoch).replace("/Date(", "").replace(")/", "")  # isolate epoch time
     epoch_ms = epoch_string.replace("+0000", "")  # epoch in ms (UTC)
