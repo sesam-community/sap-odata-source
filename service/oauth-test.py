@@ -53,17 +53,12 @@ if env_vars.AUTH_TYPE.lower() == "basic":
 elif env_vars.AUTH_TYPE.lower() == "token":
     logger.info(f"Using token authentication")
 
-    # token_url = "https://banenorsf-stage.plateau.com/learning/oauth-api/rest/v1/token"
     token_url = env_vars.TOKEN_URL
-
-    # base_url = "https://banenorsf-stage.plateau.com/learning/odatav4/"
     base_url = env_vars.SERVICE_URL
-    # data_api = "searchCurriculum/v1/Curricula"
+    token_headers = json.loads(env_vars.TOKEN_REQUEST_HEADERS)
+    token_body = json.loads(env_vars.TOKEN_REQUEST_BODY)
 
-    headers = json.loads(env_vars.TOKEN_REQUEST_HEADERS)
-    body = json.loads(env_vars.TOKEN_REQUEST_BODY)
-
-    auth = get_access_token(token_url, headers, body)
+    auth = get_access_token(token_url, token_headers, token_body)
 
 else:
     logger.error(f"Unsupported authentication type: {env_vars.AUTH_TYPE}")
@@ -130,10 +125,11 @@ def process_request(url, since_enabled, since_property):
         data = response.json()
         entities = None
 
-        # Entities of interest are either returned as { "d": { <entities> } }
-        # or as { "d": { "results": [<entities>] } }
+        # For SAP Odata v2, entities of interest are either returned as { "d": { <entity> } }
+        # or as { "d": { "results": [ <entities> ] } }
+        # For Odata v4, entities of interest are always returned as { "value": [ <entities> ] }
 
-        # Try to fetch entities from "d.results" first
+        # Try to fetch entities from "d.results" first (SAP Odata v2)
         if "d" in data:
             if "results" in data.get("d"):
                 entities = data["d"].get("results")
@@ -142,7 +138,7 @@ def process_request(url, since_enabled, since_property):
         if entities is None:  # explicitly check on None to not overwrite empty "results" list
             entities = data.get("d")
 
-        # Then try to fetch from "value"
+        # Then try to fetch from "value" (Odata v4)
         if entities is None:
             entities = data.get("value")
 
@@ -182,10 +178,13 @@ def process_request(url, since_enabled, since_property):
             count += 1
             yield json.dumps(entity)
 
+        # paging
         if "d" in data:
+            # SAP Odata v2
             url = data["d"].get("__next")
         else:
-            url = None
+            # Odata v4
+            url = data.get("@odata.nextLink")
 
     logger.info(f"Fetched {count} entities")
     yield ']'

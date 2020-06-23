@@ -13,8 +13,16 @@ import time
 logger = sesam_logger("sap-odata-source")
 
 # Get env.vars
-required_env_vars = ["SERVICE_URL", "USERNAME", "PASSWORD"]
-optional_env_vars = ["LOG_LEVEL", ("AUTH_TYPE", "basic")]
+required_env_vars = ["SERVICE_URL"]
+optional_env_vars = [
+    "LOG_LEVEL",
+    ("AUTH_TYPE", "basic"),
+    "USERNAME",
+    "PASSWORD",
+    "TOKEN_URL",
+    "TOKEN_REQUEST_HEADERS",
+    "TOKEN_REQUEST_BODY"
+]
 
 env_vars = VariablesConfig(required_env_vars, optional_env_vars=optional_env_vars)
 
@@ -24,8 +32,34 @@ if not env_vars.validate():
 
 # Authentication
 auth = None
+
+
+def get_access_token(token_url, headers, body):
+    logger.debug(f"token request url    : {token_url}")
+    logger.debug(f"token request headers: {headers}")
+    logger.debug(f"token request body   : {body}")
+
+    access_token_response = requests.post(token_url, headers=headers, json=body)
+    tokens = json.loads(access_token_response.text)
+    access_token = tokens['access_token']
+
+    return access_token
+
+
 if env_vars.AUTH_TYPE.lower() == "basic":
+    logger.info("Using basic authentication")
     auth = (env_vars.USERNAME, env_vars.PASSWORD)
+
+elif env_vars.AUTH_TYPE.lower() == "token":
+    logger.info(f"Using token authentication")
+
+    token_url = env_vars.TOKEN_URL
+    base_url = env_vars.SERVICE_URL
+    token_headers = json.loads(env_vars.TOKEN_REQUEST_HEADERS)
+    token_body = json.loads(env_vars.TOKEN_REQUEST_BODY)
+
+    auth = get_access_token(token_url, token_headers, token_body)
+
 else:
     logger.error(f"Unsupported authentication type: {env_vars.AUTH_TYPE}")
     sys.exit(1)
@@ -77,7 +111,13 @@ def process_request(url, since_enabled, since_property):
 
     while url:
         logger.info(f"Request url: {url}")
-        response = requests.get(url, auth=auth)
+
+        if env_vars.AUTH_TYPE.lower() == "token":
+            logger.debug("Token auth")
+            headers = {'Authorization': 'Bearer ' + auth}
+            response = requests.get(url, headers=headers, verify=True)
+        else:
+            response = requests.get(url, auth=auth)
 
         if not response.ok:
             abort(response.status_code)
@@ -85,16 +125,22 @@ def process_request(url, since_enabled, since_property):
         data = response.json()
         entities = None
 
-        # Entities of interest are either returned as { "d": { <entities> } }
-        # or as { "d": { "results": [<entities>] } }
+        # For SAP Odata v2, entities of interest are either returned as { "d": { <entity> } }
+        # or as { "d": { "results": [ <entities> ] } }
+        # For Odata v4, entities of interest are always returned as { "value": [ <entities> ] }
 
-        # Try to fetch entities from "results" first
-        if "results" in data.get("d"):
-            entities = data["d"].get("results")
+        # Try to fetch entities from "d.results" first (SAP Odata v2)
+        if "d" in data:
+            if "results" in data.get("d"):
+                entities = data["d"].get("results")
 
         # Then try to fetch from "d"
         if entities is None:  # explicitly check on None to not overwrite empty "results" list
             entities = data.get("d")
+
+        # Then try to fetch from "value" (Odata v4)
+        if entities is None:
+            entities = data.get("value")
 
         # Stop if there are no entities to process
         if not entities:
@@ -132,7 +178,13 @@ def process_request(url, since_enabled, since_property):
             count += 1
             yield json.dumps(entity)
 
-        url = data["d"].get("__next")
+        # paging
+        if "d" in data:
+            # SAP Odata v2
+            url = data["d"].get("__next")
+        else:
+            # Odata v4
+            url = data.get("@odata.nextLink")
 
     logger.info(f"Fetched {count} entities")
     yield ']'
