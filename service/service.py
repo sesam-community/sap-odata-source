@@ -171,9 +171,10 @@ def process_request(url, since_enabled, since_property):
                     # logger.debug(f"{key}: {value} --> {iso_date}")
                     entity[key] = iso_date
 
-            # entity["_updated"] = entity.get(since_property)
-            # entity["_updated"] = time.gmtime('%Y-%m-%dT%H:%M:%S')  # set current GMT time
-            entity["_updated"] = time.strftime('%Y-%m-%dT%H:%M:%S')  # set current local time
+            if since_enabled:
+                # entity["_updated"] = entity.get(since_property)
+                # entity["_updated"] = time.gmtime('%Y-%m-%dT%H:%M:%S')  # set current GMT time
+                entity["_updated"] = time.strftime('%Y-%m-%dT%H:%M:%S')  # set current local time
 
             count += 1
             yield json.dumps(entity)
