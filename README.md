@@ -3,7 +3,10 @@
 SAP OData microservice connector for Sesam.io powered apps.
 
 Supports:
+- SAP OData v2
+- Odata v4
 - Basic Authentication
+- OAuth Token Authentication with refresh
 - JSON streaming of response messages
 - Snapshot paging
 - Dynamic URL query handling
@@ -17,13 +20,44 @@ https://hub.docker.com/repository/docker/gamh/sap-odata-source/
 
 `SERVICE_URL` - base url to the Odata Service API
 
-`AUTH_TYPE` - Authentication method (Default: "Basic")
+`AUTH_TYPE` - Authentication method ("basic" or "token")
+
+`LOG_LEVEL` - Default 'INFO'. Ref: https://docs.python.org/3/howto/logging.html#logging-levels
+
+### For AUTH_TYPE = "basic"
 
 `USERNAME` - Username to authenticate with the Odata Service
 
 `PASSWORD` - Password to authenticate with the Odata Service
 
-`LOG_LEVEL` - Default 'INFO'. Ref: https://docs.python.org/3/howto/logging.html#logging-levels
+### For AUTH_TYPE = "token"
+
+`TOKEN_URL` - URL to fetch authentication token
+
+`TOKEN_REQUEST_HEADERS` - JSON formatted headers supplied by customer
+
+`TOKEN_REQUEST_BODY` - JSON formatted body supplied by customer
+
+#### TOKEN_REQUEST_HEADERS example
+```
+{
+  "Authorization": "Basic <JWT to authenicate with TOKEN_URL>",
+  "user-agent": "sap-odata-source/x.y.z"
+}
+```
+
+#### TOKEN_REQUEST_BODY example
+```
+{
+  "grant_type": "client_credentials",
+  "scope": {
+    "userId": "<userId>",
+    "companyId": "<companyId>",
+    "userType": "<userType>",
+    "resourceType": "<resourceType>"
+  }
+}
+```
 
 ## URL parameters
 
@@ -82,7 +116,7 @@ Supply `since_property=<last modified date property>` in pipe.source.url to over
 }
 ```
 
-## Example response from SAP to the Microservice
+## Example response from SAP (SAP OData v2) to the Microservice
 ```
 {
   "d": {
