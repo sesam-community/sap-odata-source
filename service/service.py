@@ -23,18 +23,27 @@ optional_env_vars = [
     "TOKEN_REQUEST_HEADERS",
     "TOKEN_REQUEST_BODY"
 ]
-
 env_vars = VariablesConfig(required_env_vars, optional_env_vars=optional_env_vars)
 
 # Check that all required env.vars are supplied
 if not env_vars.validate():
     sys.exit(1)
 
-# Authentication
-auth = None
+# Verify authentication
+supported_auth_types = ["basic", "token"]
+
+if env_vars.AUTH_TYPE.lower() not in supported_auth_types:
+    logger.error(f"Unsupported authentication type: {env_vars.AUTH_TYPE}")
+    sys.exit(1)
+else:
+    logger.info(f"Using {env_vars.AUTH_TYPE.lower()} authentication")
+
+# Start the service
+app = Flask(__name__)
 
 
 def get_access_token(token_url, headers, body):
+    """Refresh access token."""
     logger.debug(f"token request url    : {token_url}")
     logger.debug(f"token request headers: {headers}")
     logger.debug(f"token request body   : {body}")
@@ -46,28 +55,6 @@ def get_access_token(token_url, headers, body):
     return access_token
 
 
-if env_vars.AUTH_TYPE.lower() == "basic":
-    logger.info("Using basic authentication")
-    auth = (env_vars.USERNAME, env_vars.PASSWORD)
-
-elif env_vars.AUTH_TYPE.lower() == "token":
-    logger.info(f"Using token authentication")
-
-    token_url = env_vars.TOKEN_URL
-    base_url = env_vars.SERVICE_URL
-    token_headers = json.loads(env_vars.TOKEN_REQUEST_HEADERS)
-    token_body = json.loads(env_vars.TOKEN_REQUEST_BODY)
-
-    auth = get_access_token(token_url, token_headers, token_body)
-
-else:
-    logger.error(f"Unsupported authentication type: {env_vars.AUTH_TYPE}")
-    sys.exit(1)
-
-# Start the service
-app = Flask(__name__)
-
-
 @app.route("/<path:entity_set>", methods=["GET"])
 def get_entity_set(entity_set):
     """Service entry point."""
@@ -76,7 +63,7 @@ def get_entity_set(entity_set):
     since_property = request.args.get("since_property") or "lastModifiedDateTime"
     since_enabled = request.args.get("since") is not None
 
-    url = f"{env_vars.SERVICE_URL}{entity_set}?$format=json&{query}"
+    url = f"{env_vars.SERVICE_URL}{entity_set}?$format=json{query}"
 
     if since_enabled and since_property:
         since = request.args.get("since")
@@ -91,10 +78,7 @@ def get_url_query(req):
     args = dict(req.args)
     query = ""
     for key in args.keys():
-        if len(query):
-            query += "&"
-
-        query += f"{key}={args[key]}"
+        query += f"&{key}={args[key]}"
 
     return query
 
@@ -108,15 +92,24 @@ def process_request(url, since_enabled, since_property):
     yield '['
     first = True
     count = 0  # number of entities fetched
+    auth = None
 
     while url:
         logger.info(f"Request url: {url}")
 
         if env_vars.AUTH_TYPE.lower() == "token":
             logger.debug("Token auth")
+            # brute force token refresh for now
+            auth = get_access_token(
+                env_vars.TOKEN_URL,
+                json.loads(env_vars.TOKEN_REQUEST_HEADERS),
+                json.loads(env_vars.TOKEN_REQUEST_BODY)
+            )
             headers = {'Authorization': 'Bearer ' + auth}
             response = requests.get(url, headers=headers, verify=True)
         else:
+            logger.debug("Basic auth")
+            auth = (env_vars.USERNAME, env_vars.PASSWORD)
             response = requests.get(url, auth=auth)
 
         if not response.ok:
