@@ -6,7 +6,7 @@ Supports:
 - SAP OData v2
 - Odata v4
 - Basic Authentication
-- OAuth Token Authentication
+- OAuth Token Authentication with refresh
 - JSON streaming of response messages
 - Snapshot paging
 - Dynamic URL query handling
