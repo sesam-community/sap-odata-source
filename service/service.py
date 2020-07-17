@@ -68,6 +68,7 @@ def get_entity_set(entity_set):
     if since_enabled and since_property:
         since = request.args.get("since")
         url += f"&$filter={since_property} gt '{since}'"
+        logger.debug(f"since_property: {since_property}; since: '{since}'")
 
     return Response(process_request(url=url, since_enabled=since_enabled, since_property=since_property),
                     mimetype="application/json")
@@ -155,14 +156,22 @@ def process_request(url, since_enabled, since_property):
 
                 value = entity.get(key)
 
-                # Dates are represented as strings in SAP so all non-string values can be skipped
-                if not isinstance(value, str):
+                # Dates are represented as strings in SAP Odata v2 ...
+                if isinstance(value, str):
+                    # Dates are represented as "/Date(<epoch value>)/"
+                    if "/Date(" in value:
+                        iso_date = sap_epoch_to_iso_date(value)
+                        # logger.debug(f"{key}: {value} --> {iso_date}")
+                        entity[key] = iso_date
+                # ... and integers in SAP Odata v4
+                elif isinstance(value, int):
+                    # Assuming property names containing 'Date' are dates
+                    if "Date" in key:
+                        iso_date = sap_epoch_to_iso_date(value)
+                        # logger.debug(f"{key}: {value} --> {iso_date}")
+                        entity[key] = iso_date
+                else:
                     continue
-
-                if value and "/Date(" in value:
-                    iso_date = sap_epoch_to_iso_date(value)
-                    # logger.debug(f"{key}: {value} --> {iso_date}")
-                    entity[key] = iso_date
 
             if since_enabled:
                 # entity["_updated"] = entity.get(since_property)
@@ -187,8 +196,12 @@ def process_request(url, since_enabled, since_property):
 def sap_epoch_to_iso_date(sap_epoch):
     """Convert SAP date string in UTC milliseconds to local ISO date."""
 
-    epoch_string = str(sap_epoch).replace("/Date(", "").replace(")/", "")  # isolate epoch time
-    epoch_ms = epoch_string.replace("+0000", "")  # epoch in ms (UTC)
+    if isinstance(sap_epoch, str):
+        epoch_string = str(sap_epoch).replace("/Date(", "").replace(")/", "")  # isolate epoch time
+        epoch_ms = epoch_string.replace("+0000", "")  # epoch in ms (UTC)
+    else:
+        epoch_ms = sap_epoch
+
     epoch_timestamp = int(epoch_ms) / 1000  # epoch in seconds (UTC)
     # dt = time.gmtime(epoch_timestamp)  # GMT time
     dt = time.localtime(epoch_timestamp)  # local time
