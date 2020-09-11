@@ -173,10 +173,10 @@ def process_request(url, since_enabled, since_property):
                 else:
                     continue
 
-            if since_enabled:
+            #if since_enabled:
                 # entity["_updated"] = entity.get(since_property)
                 # entity["_updated"] = time.gmtime('%Y-%m-%dT%H:%M:%S')  # set current GMT time
-                entity["_updated"] = time.strftime('%Y-%m-%dT%H:%M:%S')  # set current local time
+            entity["_updated"] = time.strftime('%Y-%m-%dT%H:%M:%S')  # set current local time
 
             count += 1
             yield json.dumps(entity)
