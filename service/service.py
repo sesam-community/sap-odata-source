@@ -20,8 +20,15 @@ optional_env_vars = [
     "USERNAME",
     "PASSWORD",
     "TOKEN_URL",
-    "TOKEN_REQUEST_HEADERS",
-    "TOKEN_REQUEST_BODY"
+    ("TOKEN_REQUEST_HEADERS", '{"Content-Type": "application/x-www-form-urlencoded"}'),
+    "TOKEN_REQUEST_BODY",
+    "ASSERTION_URL",
+    ("ASSERTION_REQUEST_HEADERS", '{"Content-Type": "application/x-www-form-urlencoded"}'),
+    "CLIENT_ID",
+    "USER_ID",
+    "PRIVATE_KEY",
+    "COMPANY_ID",
+    "GRANT_TYPE"
 ]
 env_vars = VariablesConfig(required_env_vars, optional_env_vars=optional_env_vars)
 
@@ -30,7 +37,7 @@ if not env_vars.validate():
     sys.exit(1)
 
 # Verify authentication
-supported_auth_types = ["basic", "token"]
+supported_auth_types = ["basic", "token", "oauth2"]
 
 if env_vars.AUTH_TYPE.lower() not in supported_auth_types:
     logger.error(f"Unsupported authentication type: {env_vars.AUTH_TYPE}")
@@ -108,6 +115,32 @@ def process_request(url, since_enabled, since_property):
             )
             headers = {'Authorization': 'Bearer ' + auth}
             response = requests.get(url, headers=headers, verify=True)
+
+        elif env_vars.AUTH_TYPE.lower() == "oauth2":
+            logger.debug("OAuth2 auth")
+
+            # Step 1: Fetch assertion key
+            assertion_url = env_vars.ASSERTION_URL
+            assertion_headers = json.loads(env_vars.ASSERTION_REQUEST_HEADERS)
+            assertion_body = f"client_id={env_vars.CLIENT_ID} \
+                &user_id={env_vars.USER_ID} \
+                &token_url={env_vars.TOKEN_URL} \
+                &private_key={env_vars.PRIVATE_KEY}"
+
+            assertion = requests.post(assertion_url, headers=assertion_headers, data=assertion_body)
+
+            # Step 2: Use assertion key to fetch auth token
+            token_url = env_vars.TOKEN_URL
+            token_headers = json.loads(env_vars.TOKEN_REQUEST_HEADERS)
+            token_body = f"company_id={env_vars.COMPANY_ID}&client_id={env_vars.CLIENT_ID}&grant_type={env_vars.GRANT_TYPE}&assertion={assertion.text}"
+
+            token_response = requests.post(token_url, headers=token_headers, data=token_body)
+            token = json.loads(token_response.text)
+            auth = token['access_token']
+
+            headers = {'Authorization': 'Bearer ' + auth}
+            response = requests.get(url, headers=headers, verify=True)
+
         else:
             logger.debug("Basic auth")
             auth = (env_vars.USERNAME, env_vars.PASSWORD)
