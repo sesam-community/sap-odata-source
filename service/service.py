@@ -56,6 +56,7 @@ def get_access_token(token_url, headers, body):
     logger.debug(f"token request body   : {body}")
 
     access_token_response = requests.post(token_url, headers=headers, json=body)
+
     tokens = json.loads(access_token_response.text)
     access_token = tokens['access_token']
 
@@ -97,9 +98,11 @@ def process_request(url, since_enabled, since_property):
     logger.debug(f"since_enabled: {since_enabled}")
     logger.debug(f"since_property: {since_property}")
 
+    request_url = url  # keep original request url for logging
+
     yield '['
     first = True
-    count = 0  # number of entities fetched
+    entity_count = 0  # number of entities fetched
     auth = None
 
     while url:
@@ -122,22 +125,25 @@ def process_request(url, since_enabled, since_property):
             # Step 1: Fetch assertion key
             assertion_url = env_vars.ASSERTION_URL
             assertion_headers = json.loads(env_vars.ASSERTION_REQUEST_HEADERS)
-            assertion_body = f"client_id={env_vars.CLIENT_ID} \
-                &user_id={env_vars.USER_ID} \
-                &token_url={env_vars.TOKEN_URL} \
-                &private_key={env_vars.PRIVATE_KEY}"
-
+            assertion_body = f"client_id={env_vars.CLIENT_ID}" \
+                f"&user_id={env_vars.USER_ID}" \
+                f"&token_url={env_vars.TOKEN_URL}" \
+                f"&private_key={env_vars.PRIVATE_KEY}"
             assertion = requests.post(assertion_url, headers=assertion_headers, data=assertion_body)
 
             # Step 2: Use assertion key to fetch auth token
             token_url = env_vars.TOKEN_URL
             token_headers = json.loads(env_vars.TOKEN_REQUEST_HEADERS)
-            token_body = f"company_id={env_vars.COMPANY_ID}&client_id={env_vars.CLIENT_ID}&grant_type={env_vars.GRANT_TYPE}&assertion={assertion.text}"
-
+            token_body = f"company_id={env_vars.COMPANY_ID}" \
+                f"&client_id={env_vars.CLIENT_ID}" \
+                f"&grant_type={env_vars.GRANT_TYPE}" \
+                f"&assertion={assertion.text}"
             token_response = requests.post(token_url, headers=token_headers, data=token_body)
+
             token = json.loads(token_response.text)
             auth = token['access_token']
 
+            # Step 3: Use auth token to fetch resource
             headers = {'Authorization': 'Bearer ' + auth}
             response = requests.get(url, headers=headers, verify=True)
 
@@ -211,7 +217,7 @@ def process_request(url, since_enabled, since_property):
                 # entity["_updated"] = time.gmtime('%Y-%m-%dT%H:%M:%S')  # set current GMT time
             entity["_updated"] = time.strftime('%Y-%m-%dT%H:%M:%S')  # set current local time
 
-            count += 1
+            entity_count += 1
             yield json.dumps(entity)
 
         # paging
@@ -222,7 +228,7 @@ def process_request(url, since_enabled, since_property):
             # Odata v4
             url = data.get("@odata.nextLink")
 
-    logger.info(f"Fetched {count} entities")
+    logger.info(f"Fetched {entity_count} entities from {request_url}")
     yield ']'
 
 
