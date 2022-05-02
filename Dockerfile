@@ -6,6 +6,7 @@ ARG Commit=unknown
 LABEL Commit $Commit
 COPY ./service /service
 WORKDIR /service
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 EXPOSE 5000/tcp
 ENTRYPOINT ["python"]

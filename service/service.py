@@ -20,8 +20,15 @@ optional_env_vars = [
     "USERNAME",
     "PASSWORD",
     "TOKEN_URL",
-    "TOKEN_REQUEST_HEADERS",
-    "TOKEN_REQUEST_BODY"
+    ("TOKEN_REQUEST_HEADERS", '{"Content-Type": "application/x-www-form-urlencoded"}'),
+    "TOKEN_REQUEST_BODY",
+    "ASSERTION_URL",
+    ("ASSERTION_REQUEST_HEADERS", '{"Content-Type": "application/x-www-form-urlencoded"}'),
+    "CLIENT_ID",
+    "USER_ID",
+    "PRIVATE_KEY",
+    "COMPANY_ID",
+    "GRANT_TYPE"
 ]
 env_vars = VariablesConfig(required_env_vars, optional_env_vars=optional_env_vars)
 
@@ -30,7 +37,7 @@ if not env_vars.validate():
     sys.exit(1)
 
 # Verify authentication
-supported_auth_types = ["basic", "token"]
+supported_auth_types = ["basic", "token", "oauth2"]
 
 if env_vars.AUTH_TYPE.lower() not in supported_auth_types:
     logger.error(f"Unsupported authentication type: {env_vars.AUTH_TYPE}")
@@ -49,6 +56,7 @@ def get_access_token(token_url, headers, body):
     logger.debug(f"token request body   : {body}")
 
     access_token_response = requests.post(token_url, headers=headers, json=body)
+
     tokens = json.loads(access_token_response.text)
     access_token = tokens['access_token']
 
@@ -90,9 +98,11 @@ def process_request(url, since_enabled, since_property):
     logger.debug(f"since_enabled: {since_enabled}")
     logger.debug(f"since_property: {since_property}")
 
+    request_url = url  # keep original request url for logging
+
     yield '['
     first = True
-    count = 0  # number of entities fetched
+    entity_count = 0  # number of entities fetched
     auth = None
     session = requests.Session()  # use this to keep connection alive
 
@@ -111,7 +121,36 @@ def process_request(url, since_enabled, since_property):
                 json.loads(env_vars.TOKEN_REQUEST_BODY)
             )
             headers = {'Authorization': 'Bearer ' + auth}
-            response = session.get(url, headers=headers, verify=True)
+            response = requests.get(url, headers=headers, verify=True)
+
+        elif env_vars.AUTH_TYPE.lower() == "oauth2":
+            logger.debug("OAuth2 auth")
+
+            # Step 1: Fetch assertion key
+            assertion_url = env_vars.ASSERTION_URL
+            assertion_headers = json.loads(env_vars.ASSERTION_REQUEST_HEADERS)
+            assertion_body = f"client_id={env_vars.CLIENT_ID}" \
+                f"&user_id={env_vars.USER_ID}" \
+                f"&token_url={env_vars.TOKEN_URL}" \
+                f"&private_key={env_vars.PRIVATE_KEY}"
+            assertion = requests.post(assertion_url, headers=assertion_headers, data=assertion_body)
+
+            # Step 2: Use assertion key to fetch auth token
+            token_url = env_vars.TOKEN_URL
+            token_headers = json.loads(env_vars.TOKEN_REQUEST_HEADERS)
+            token_body = f"company_id={env_vars.COMPANY_ID}" \
+                f"&client_id={env_vars.CLIENT_ID}" \
+                f"&grant_type={env_vars.GRANT_TYPE}" \
+                f"&assertion={assertion.text}"
+            token_response = requests.post(token_url, headers=token_headers, data=token_body)
+
+            token = json.loads(token_response.text)
+            auth = token['access_token']
+
+            # Step 3: Use auth token to fetch resource
+            headers = {'Authorization': 'Bearer ' + auth}
+            response = requests.get(url, headers=headers, verify=True)
+
         else:
             logger.debug("Basic auth")
             auth = (env_vars.USERNAME, env_vars.PASSWORD)
@@ -183,7 +222,7 @@ def process_request(url, since_enabled, since_property):
                 # entity["_updated"] = time.gmtime('%Y-%m-%dT%H:%M:%S')  # set current GMT time
             entity["_updated"] = time.strftime('%Y-%m-%dT%H:%M:%S')  # set current local time
 
-            count += 1
+            entity_count += 1
             yield json.dumps(entity)
 
         # paging
@@ -194,7 +233,7 @@ def process_request(url, since_enabled, since_property):
             # Odata v4
             url = data.get("@odata.nextLink")
 
-    logger.info(f"Fetched {count} entities")
+    logger.info(f"Fetched {entity_count} entities from {request_url}")
     yield ']'
 
 
