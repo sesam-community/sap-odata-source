@@ -104,9 +104,13 @@ def process_request(url, since_enabled, since_property):
     first = True
     entity_count = 0  # number of entities fetched
     auth = None
+    session = requests.Session()  # use this to keep connection alive
 
     while url:
         logger.info(f"Request url: {url}")
+
+        logger.debug(f"Wait a bit to not overload peer.")
+        time.sleep(0.01)  # remedy for 'Connection reset by peer' error
 
         if env_vars.AUTH_TYPE.lower() == "token":
             logger.debug("Token auth")
@@ -150,13 +154,14 @@ def process_request(url, since_enabled, since_property):
         else:
             logger.debug("Basic auth")
             auth = (env_vars.USERNAME, env_vars.PASSWORD)
-            response = requests.get(url, auth=auth)
+            response = session.get(url, auth=auth)
 
         if not response.ok:
             abort(response.status_code)
 
         data = response.json()
         entities = None
+        logger.debug(f"session: {session.headers}")
 
         # For SAP Odata v2, entities of interest are either returned as { "d": { <entity> } }
         # or as { "d": { "results": [ <entities> ] } }
