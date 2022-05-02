@@ -1,5 +1,7 @@
 # sap-odata-source
 
+[![SesamCommunity CI&CD](https://github.com/sesam-community/sap-odata-service/actions/workflows/sesam-community-ci-cd.yml/badge.svg)](https://github.com/sesam-community/sap-odata-service/actions/workflows/sesam-community-ci-cd.yml)
+
 SAP OData microservice connector for Sesam.io powered apps.
 
 Supports:
