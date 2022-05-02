@@ -15,10 +15,6 @@ Supports:
 - Dynamic URL query handling
 - Delta import
 
-## Docker image
-
-https://hub.docker.com/repository/docker/gamh/sap-odata-source/
-
 ## Environment variables
 
 `SERVICE_URL` - base url to the Odata Service API
@@ -47,7 +43,7 @@ https://hub.docker.com/repository/docker/gamh/sap-odata-source/
       "SERVICE_URL": "https://<service_url>/odata/v2/",
       "USERNAME": "$SECRET(sap-username)"
     },
-    "image": "gamh/sap-odata-source:<version>",
+    "image": "sesamcommunity/sap-odata-source:<version>",
     "port": 5000
   },
   "verify_ssl": true
@@ -130,7 +126,7 @@ OAuth2 authentication is a two step process:
       "TOKEN_URL": "<token url>",
       "USER_ID": "<user id>"
     },
-    "image": "gamh/sap-odata-source:1.5.0"
+    "image": "sesamcommunity/sap-odata-source:1.5.0"
     "port": 5000
   },
   "verify_ssl": true
