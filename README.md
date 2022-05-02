@@ -7,7 +7,7 @@ Supports:
 - Odata v4
 - Basic Authentication
 - OAuth Token Authentication with refresh
-- OAuth2 Authentication
+- OAuth2 Authentication with refresh
 - JSON streaming of response messages
 - Snapshot paging
 - Dynamic URL query handling
@@ -32,6 +32,7 @@ https://hub.docker.com/repository/docker/gamh/sap-odata-source/
 `PASSWORD` - Password to authenticate with the Odata Service
 
 #### Example system config
+
 ```
 {
   "_id": "sap-odata-source",
@@ -60,6 +61,7 @@ https://hub.docker.com/repository/docker/gamh/sap-odata-source/
 `TOKEN_REQUEST_BODY` - JSON formatted body supplied by customer
 
 #### TOKEN_REQUEST_HEADERS example
+
 ```
 {
   "Authorization": "Basic <JWT to authenicate with TOKEN_URL>",
@@ -68,6 +70,7 @@ https://hub.docker.com/repository/docker/gamh/sap-odata-source/
 ```
 
 #### TOKEN_REQUEST_BODY example
+
 ```
 {
   "grant_type": "client_credentials",
@@ -86,7 +89,9 @@ OAuth2 authentication is a two step process:
 
 1. Fetch assertion key using private key supplied by customer
 
-2. Fetch authentication token using assertion key
+`ASSERTION_URL` - URL to fetch assertion key
+
+`ASSERTION_REQUEST_HEADERS` - JSON formatted headers (Default: `{"Content-Type": "application/x-www-form-urlencoded"}`)
 
 `CLIENT_ID` - Supplied by customer
 
@@ -94,19 +99,18 @@ OAuth2 authentication is a two step process:
 
 `PRIVATE_KEY` - Secret to authenticate with assertion service
 
-`ASSERTION_URL` - URL to fetch assertion key
-
-`ASSERTION_REQUEST_HEADERS` - JSON formatted headers supplied by customer, default: `{"Content-Type": "application/x-www-form-urlencoded"}`
-
-`COMPANY_ID` - Supplied by customer
-
-`GRANT_TYPE` - Supplied by customer (ex: urn:ietf:params:oauth:grant-type:saml2-bearer)
+2. Fetch authentication token using assertion key
 
 `TOKEN_URL` - URL to fetch authentication token
 
-`TOKEN_REQUEST_HEADERS` - JSON formatted headers supplied by customer, default: `{"Content-Type": "application/x-www-form-urlencoded"}`
+`TOKEN_REQUEST_HEADERS` - JSON formatted headers (Default: `{"Content-Type": "application/x-www-form-urlencoded"}`)
+
+`COMPANY_ID` - Supplied by customer
+
+`GRANT_TYPE` - Supplied by customer (ex: "urn:ietf:params:oauth:grant-type:saml2-bearer")
 
 #### Example system config
+
 ```
 {
   "_id": "sap-odata-source",
@@ -142,6 +146,7 @@ Supply `since_property=<last modified date property>` in pipe.source.url to over
 ```
 
 ## Example pipe config
+
 ```
 {
   "_id": "sap-odata-source-perperson",
@@ -169,6 +174,7 @@ Supply `since_property=<last modified date property>` in pipe.source.url to over
 ```
 
 ## Example response from SAP (SAP OData v2) to the Microservice
+
 ```
 {
   "d": {
@@ -335,6 +341,7 @@ Supply `since_property=<last modified date property>` in pipe.source.url to over
 ```
 
 ## Example JSON stream from the Microservice to Sesam
+
 ```
 [
   {
