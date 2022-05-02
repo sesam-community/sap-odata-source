@@ -85,7 +85,7 @@ Supports:
 
 OAuth2 authentication is a two step process:
 
-1. Fetch assertion key using private key supplied by customer
+1. Fetch assertion key using private key supplied by customer:
 
 `ASSERTION_URL` - URL to fetch assertion key
 
@@ -97,7 +97,7 @@ OAuth2 authentication is a two step process:
 
 `PRIVATE_KEY` - Secret to authenticate with assertion service
 
-2. Fetch authentication token using assertion key
+2. Fetch authentication token using assertion key:
 
 `TOKEN_URL` - URL to fetch authentication token
 
