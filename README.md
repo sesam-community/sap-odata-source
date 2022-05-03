@@ -126,7 +126,7 @@ OAuth2 authentication is a two step process:
       "TOKEN_URL": "<token url>",
       "USER_ID": "<user id>"
     },
-    "image": "sesamcommunity/sap-odata-source:1.5.0"
+    "image": "sesamcommunity/sap-odata-source:<version>"
     "port": 5000
   },
   "verify_ssl": true
